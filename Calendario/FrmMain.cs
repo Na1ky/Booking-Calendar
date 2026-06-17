@@ -206,15 +206,15 @@ namespace Calendario
             pnlActionContainer.Controls.Clear();
             pnlActionContainer.Controls.Add(new Panel { Height = 1, Dock = DockStyle.Top, BackColor = C_BORDER });
 
-            // L'altezza del pannello inferiore si adatta al form (massimo 480px)
-            int h = Math.Min(actionForm.Height, 480);
+            // L'altezza del pannello inferiore si adatta al form (massimo 520px)
+            int h = Math.Min(actionForm.Height, 520);
             rootLayout.RowStyles[1].Height = h;
             rootLayout.PerformLayout();
             this.Refresh();
 
             actionForm.TopLevel         = false;
             actionForm.FormBorderStyle  = FormBorderStyle.None;
-            actionForm.Dock             = DockStyle.Fill;
+            actionForm.Dock             = DockStyle.Top;
 
             actionForm.FormClosed += (s, ev) =>
             {

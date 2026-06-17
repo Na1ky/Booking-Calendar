@@ -32,8 +32,8 @@ namespace Calendario.VIEW
             this.BackColor = BG;
             this.ForeColor = TEXT;
             this.Font = new Font("Segoe UI", 10F);
-            this.MinimumSize = new Size(860, 600);
-            this.Size = new Size(1020, 680);
+            this.MinimumSize = new Size(900, 460);
+            this.Size = new Size(1060, 480);
             this.Text = "Gestione Prezzi e Calcolatore";
             this.StartPosition = FormStartPosition.CenterParent;
 
@@ -116,7 +116,7 @@ namespace Calendario.VIEW
                 Padding = new Padding(5)
             };
             dgvPrezzi.ColumnHeadersHeight = 35;
-            dgvPrezzi.RowTemplate.Height = 28;
+            dgvPrezzi.RowTemplate.Height = 27;
 
             pnlLeft.Controls.Add(dgvPrezzi);
             lblPrezziTitle.SendToBack();
@@ -142,7 +142,7 @@ namespace Calendario.VIEW
                 BackColor = Color.Transparent
             };
             rightLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            rightLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 80));
+            rightLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 72));
             mainLayout.Controls.Add(rightLayout, 1, 0);
 
             // ── CARD CALCOLATORE ──────────────────────────────────────────────────
@@ -169,7 +169,7 @@ namespace Calendario.VIEW
             {
                 Dock = DockStyle.Fill,
                 ColumnCount = 2,
-                RowCount = 4,
+                RowCount = 5,
                 BackColor = Color.Transparent,
                 Padding = new Padding(0, 4, 0, 0)
             };
@@ -177,8 +177,9 @@ namespace Calendario.VIEW
             calcStack.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
             calcStack.RowStyles.Add(new RowStyle(SizeType.Absolute, 26));   // label Check-in / Check-out
             calcStack.RowStyles.Add(new RowStyle(SizeType.Percent, 100));   // MonthCalendar (si espande)
-            calcStack.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));   // bottone CALCOLA
-            calcStack.RowStyles.Add(new RowStyle(SizeType.Absolute, 52));   // label totale
+            calcStack.RowStyles.Add(new RowStyle(SizeType.Absolute, 22));   // label data selezionata
+            calcStack.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));   // bottone CALCOLA
+            calcStack.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));   // label totale
             pnlCalcolo.Controls.Add(calcStack);
             lblCalcoloTitle.SendToBack();
 
@@ -224,7 +225,6 @@ namespace Calendario.VIEW
                 ShowTodayCircle = true
             };
             wrapIn.Controls.Add(calCheckIn);
-            // Centra orizzontalmente il calendario nel pannello
             wrapIn.Resize += (s, e) => {
                 calCheckIn.Left = Math.Max(0, (wrapIn.Width - calCheckIn.Width) / 2);
                 calCheckIn.Top  = Math.Max(0, (wrapIn.Height - calCheckIn.Height) / 2);
@@ -252,29 +252,57 @@ namespace Calendario.VIEW
             };
             calcStack.Controls.Add(wrapOut, 1, 1);
 
-            // Bottone CALCOLA (span 2 colonne)
+            // ── Label "Data selezionata" Check-in (riga 2, colonna 0) ────────────
+            var lblSelIn = new Label
+            {
+                Text = "Data selezionata: " + calCheckIn.SelectionStart.ToString("dd/MM/yyyy"),
+                ForeColor = Color.FromArgb(124, 58, 237),
+                Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),
+                Dock = DockStyle.Fill,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Margin = new Padding(2, 0, 2, 0)
+            };
+            calCheckIn.DateChanged += (s, e) =>
+                lblSelIn.Text = "Data selezionata: " + calCheckIn.SelectionStart.ToString("dd/MM/yyyy");
+            calcStack.Controls.Add(lblSelIn, 0, 2);
+
+            // ── Label "Data selezionata" Check-out (riga 2, colonna 1) ───────────
+            var lblSelOut = new Label
+            {
+                Text = "Data selezionata: " + calCheckOut.SelectionStart.ToString("dd/MM/yyyy"),
+                ForeColor = Color.FromArgb(124, 58, 237),
+                Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),
+                Dock = DockStyle.Fill,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Margin = new Padding(2, 0, 2, 0)
+            };
+            calCheckOut.DateChanged += (s, e) =>
+                lblSelOut.Text = "Data selezionata: " + calCheckOut.SelectionStart.ToString("dd/MM/yyyy");
+            calcStack.Controls.Add(lblSelOut, 1, 2);
+
+            // Bottone CALCOLA (riga 3, span 2 colonne)
             btnCalcola = new ModernButton
             {
                 Text = "CALCOLA PREZZO",
                 Dock = DockStyle.Fill,
-                Margin = new Padding(2, 8, 2, 4),
+                Margin = new Padding(2, 6, 2, 2),
                 BackColor = Color.FromArgb(79, 172, 254),
                 ForeColor = Color.Black
             };
-            calcStack.Controls.Add(btnCalcola, 0, 2);
+            calcStack.Controls.Add(btnCalcola, 0, 3);
             calcStack.SetColumnSpan(btnCalcola, 2);
 
-            // Label totale (span 2 colonne)
+            // Label totale (riga 4, span 2 colonne)
             lblTotale = new Label
             {
-                Text = "Totale: 0.00",
-                Font = new Font("Segoe UI", 16F, FontStyle.Bold),
+                Text = "Totale soggiorno: —",
+                Font = new Font("Segoe UI", 14F, FontStyle.Bold),
                 ForeColor = Color.LightGreen,
                 Dock = DockStyle.Fill,
                 TextAlign = ContentAlignment.MiddleCenter,
                 Margin = new Padding(2)
             };
-            calcStack.Controls.Add(lblTotale, 0, 3);
+            calcStack.Controls.Add(lblTotale, 0, 4);
             calcStack.SetColumnSpan(lblTotale, 2);
 
             // ── CARD PULSANTI SALVA / CHIUDI ──────────────────────────────────────

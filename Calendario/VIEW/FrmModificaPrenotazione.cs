@@ -34,8 +34,8 @@ namespace Calendario.VIEW
             this.BackColor = BG;
             this.ForeColor = TEXT;
             this.Font = new Font("Segoe UI", 10F);
-            this.MinimumSize = new Size(900, 480);
-            this.Size = new Size(1000, 530);
+            this.MinimumSize = new Size(900, 460);
+            this.Size = new Size(1000, 480);
             this.Text = "Modifica Prenotazione";
             this.StartPosition = FormStartPosition.CenterParent;
 
@@ -119,13 +119,28 @@ namespace Calendario.VIEW
             void WrapCal(string lbl, MonthCalendar cal, int col) {
                 var wrapper = new Panel { Dock = DockStyle.Fill, BackColor = Color.Transparent };
                 var lblCal = new Label { Text = lbl, ForeColor = Color.FromArgb(160, 170, 210), Font = new Font("Segoe UI", 8.5F), TextAlign = ContentAlignment.MiddleCenter, AutoSize = false, Height = 20, Dock = DockStyle.Top };
+                var lblData = new Label {
+                    Text = "Data selezionata: " + cal.SelectionStart.ToString("dd/MM/yyyy"),
+                    ForeColor = Color.FromArgb(124, 58, 237),
+                    Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    AutoSize = false,
+                    Height = 18
+                };
+                cal.DateChanged += (s, ev) => {
+                    lblData.Text = "Data selezionata: " + cal.SelectionStart.ToString("dd/MM/yyyy");
+                };
                 wrapper.Controls.Add(cal);
                 wrapper.Controls.Add(lblCal);
+                wrapper.Controls.Add(lblData);
                 wrapper.Resize += (s, ev) => {
                     int x = Math.Max(0, (wrapper.Width - cal.Width) / 2);
-                    int y = lblCal.Height + Math.Max(0, (wrapper.Height - lblCal.Height - cal.Height) / 2);
+                    int y = lblCal.Height + Math.Max(0, (wrapper.Height - lblCal.Height - lblData.Height - cal.Height) / 2);
                     cal.Location = new Point(x, y);
                     lblCal.Width = cal.Width;
+                    lblData.Width = cal.Width;
+                    lblData.Left  = x;
+                    lblData.Top   = cal.Bottom + 2;
                 };
                 calLayout.Controls.Add(wrapper, col, 0);
             }

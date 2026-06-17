@@ -29,8 +29,8 @@ namespace Calendario.VIEW
             this.BackColor = BG;
             this.ForeColor = TEXT;
             this.Font = new Font("Segoe UI", 10F);
-            this.MinimumSize = new Size(900, 480);
-            this.Size = new Size(1000, 530);
+            this.MinimumSize = new Size(900, 460);
+            this.Size = new Size(1000, 480);
             this.Text = "Aggiungi Prenotazione";
             this.StartPosition = FormStartPosition.CenterParent;
 
@@ -54,17 +54,16 @@ namespace Calendario.VIEW
             var lblDatiTitle = new Label { Text = "Dettagli Ospite", ForeColor = ACCENT, Font = new Font("Segoe UI", 11F, FontStyle.Bold), Dock = DockStyle.Top, Height = 28 };
             pnlLeft.Controls.Add(lblDatiTitle);
 
-            var tlpDati = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 4, Padding = new Padding(0, 5, 0, 0) };
+            var tlpDati = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 3, Padding = new Padding(0, 5, 0, 0) };
             tlpDati.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
             tlpDati.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
             tlpDati.RowStyles.Add(new RowStyle(SizeType.Absolute, 65));
+            tlpDati.RowStyles.Add(new RowStyle(SizeType.Absolute, 90)); // Extra space for Famiglia Dominici
             tlpDati.RowStyles.Add(new RowStyle(SizeType.Absolute, 65));
-            tlpDati.RowStyles.Add(new RowStyle(SizeType.Absolute, 65));
-            tlpDati.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));
             pnlLeft.Controls.Add(tlpDati);
             lblDatiTitle.SendToBack();
 
-            void AddInput(string label, Control c, int col, int row) {
+            Panel AddInput(string label, Control c, int col, int row) {
                 var p = new Panel { Dock = DockStyle.Fill, Margin = new Padding(4, 2, 4, 2) };
                 var lbl = new Label { Text = label, ForeColor = Color.FromArgb(160, 170, 210), Dock = DockStyle.Top, Height = 18, Font = new Font("Segoe UI", 8.5F), TextAlign = ContentAlignment.MiddleLeft };
                 var container = new ModernInputContainer { Dock = DockStyle.Top, Height = 36 };
@@ -77,6 +76,7 @@ namespace Calendario.VIEW
                 p.Controls.Add(container);
                 p.Controls.Add(lbl);
                 tlpDati.Controls.Add(p, col, row);
+                return p;
             }
 
             txtNome = new TextBox();
@@ -88,34 +88,34 @@ namespace Calendario.VIEW
 
             AddInput("Nome", txtNome, 0, 0);
             AddInput("Cognome", txtCognome, 1, 0);
-            AddInput("Tipologia", cmbTipo, 0, 1);
+            var pnlTipo = AddInput("Tipologia", cmbTipo, 0, 1);
             AddInput("Acconto (€)", nudAcc, 1, 1);
             AddInput("Spese (€)", nudSp, 0, 2);
             AddInput("Versamento (€)", nudVers, 1, 2);
 
-            // ── Famiglia Dominici checkbox (riga 3, span 2 colonne) ─────────────────
+            // ── Famiglia Dominici checkbox accodata sotto Tipologia ─────────────────
             chkFamDominici = new CheckBox
             {
                 Text = "Famiglia Dominici",
-                ForeColor = Color.FromArgb(226, 232, 255),
-                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                ForeColor = ACCENT,
+                Font = new Font("Segoe UI", 9.0F),
                 BackColor = Color.Transparent,
-                Dock = DockStyle.Fill,
-                Margin = new Padding(8, 8, 8, 8),
+                AutoSize = true,
+                Margin = new Padding(0),
                 Cursor = Cursors.Hand
             };
-            // Stile custom colore checkbox
             chkFamDominici.FlatStyle = FlatStyle.Flat;
-            chkFamDominici.ForeColor = ACCENT;
-            var pnlChk = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(18, 24, 54), Margin = new Padding(4, 2, 4, 2) };
+            chkFamDominici.FlatAppearance.BorderColor = ACCENT;
+            
+            var pnlChk = new Panel { Dock = DockStyle.Bottom, Height = 26, BackColor = Color.Transparent };
+            chkFamDominici.Location = new Point(0, 4);
             pnlChk.Controls.Add(chkFamDominici);
-            tlpDati.Controls.Add(pnlChk, 0, 3);
-            tlpDati.SetColumnSpan(pnlChk, 2);
+            pnlTipo.Controls.Add(pnlChk);
 
             // ─── DESTRA: CALENDARIO ──────────────────────────────────────────────
             var pnlRightLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 2, Margin = new Padding(5, 0, 0, 0) };
             pnlRightLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            pnlRightLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 58));
+            pnlRightLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 72));
             mainLayout.Controls.Add(pnlRightLayout, 1, 0);
 
             var pnlDate = new ModernPanel { Dock = DockStyle.Fill, Margin = new Padding(0, 0, 0, 5), Padding = new Padding(12) };
