@@ -9,7 +9,7 @@ DefaultDirName={autopf}\Calendario Prenotazioni
 DefaultGroupName=Calendario Prenotazioni
 ; Cartella di output dove verrà salvato l'installer (.exe)
 OutputDir=Installer
-OutputBaseFilename=Calendario_Setup_v1.0
+OutputBaseFilename=Calendario_Setup_v1.1
 SetupIconFile=Calendario\IMG\Icona.ico
 Compression=lzma2
 SolidCompression=yes
