@@ -1,0 +1,28 @@
+[
+  {
+    "Acconto": 1.0,
+    "SpesePulizia": 50.0,
+    "Id": "FFU747",
+    "Nome": "Dominici",
+    "Cognome": "famiglia",
+    "Versamento": 1.0,
+    "DataInizio": "2026-03-08T00:00:00",
+    "DataFine": "2026-03-14T00:00:00",
+    "TipoPrenotazione": true,
+    "ColoreCella": "100, 83, 161",
+    "FamigliaDominici": true
+  },
+  {
+    "Acconto": 1.0,
+    "SpesePulizia": 50.0,
+    "Id": "ALJ676",
+    "Nome": "Michele",
+    "Cognome": "Sienna",
+    "Versamento": 1.0,
+    "DataInizio": "2026-08-01T00:00:00",
+    "DataFine": "2026-08-08T00:00:00",
+    "TipoPrenotazione": false,
+    "ColoreCella": "160, 25, 230",
+    "FamigliaDominici": false
+  }
+]
