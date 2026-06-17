@@ -32,8 +32,8 @@ namespace Calendario.VIEW
             this.BackColor = BG;
             this.ForeColor = TEXT;
             this.Font = new Font("Segoe UI", 10F);
-            this.MinimumSize = new Size(820, 500);
-            this.Size = new Size(980, 560);
+            this.MinimumSize = new Size(860, 600);
+            this.Size = new Size(1020, 680);
             this.Text = "Gestione Prezzi e Calcolatore";
             this.StartPosition = FormStartPosition.CenterParent;
 
@@ -142,7 +142,7 @@ namespace Calendario.VIEW
                 BackColor = Color.Transparent
             };
             rightLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            rightLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 62));
+            rightLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 80));
             mainLayout.Controls.Add(rightLayout, 1, 0);
 
             // ── CARD CALCOLATORE ──────────────────────────────────────────────────

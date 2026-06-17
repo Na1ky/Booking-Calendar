@@ -20,6 +20,7 @@ namespace Calendario.VIEW
         private ComboBox cmbTipo;
         private NumericUpDown nudAcc, nudSp, nudVers;
         private MonthCalendar calInizio, calFine;
+        private CheckBox chkFamDominici;
 
         public FrmAggiungiPrenotazione(PrenotazioneController gestionePrenotazioni)
         {
@@ -53,12 +54,13 @@ namespace Calendario.VIEW
             var lblDatiTitle = new Label { Text = "Dettagli Ospite", ForeColor = ACCENT, Font = new Font("Segoe UI", 11F, FontStyle.Bold), Dock = DockStyle.Top, Height = 28 };
             pnlLeft.Controls.Add(lblDatiTitle);
 
-            var tlpDati = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 3, Padding = new Padding(0, 5, 0, 0) };
+            var tlpDati = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 4, Padding = new Padding(0, 5, 0, 0) };
             tlpDati.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
             tlpDati.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
             tlpDati.RowStyles.Add(new RowStyle(SizeType.Absolute, 65));
             tlpDati.RowStyles.Add(new RowStyle(SizeType.Absolute, 65));
             tlpDati.RowStyles.Add(new RowStyle(SizeType.Absolute, 65));
+            tlpDati.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));
             pnlLeft.Controls.Add(tlpDati);
             lblDatiTitle.SendToBack();
 
@@ -90,6 +92,25 @@ namespace Calendario.VIEW
             AddInput("Acconto (€)", nudAcc, 1, 1);
             AddInput("Spese (€)", nudSp, 0, 2);
             AddInput("Versamento (€)", nudVers, 1, 2);
+
+            // ── Famiglia Dominici checkbox (riga 3, span 2 colonne) ─────────────────
+            chkFamDominici = new CheckBox
+            {
+                Text = "Famiglia Dominici",
+                ForeColor = Color.FromArgb(226, 232, 255),
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+                BackColor = Color.Transparent,
+                Dock = DockStyle.Fill,
+                Margin = new Padding(8, 8, 8, 8),
+                Cursor = Cursors.Hand
+            };
+            // Stile custom colore checkbox
+            chkFamDominici.FlatStyle = FlatStyle.Flat;
+            chkFamDominici.ForeColor = ACCENT;
+            var pnlChk = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(18, 24, 54), Margin = new Padding(4, 2, 4, 2) };
+            pnlChk.Controls.Add(chkFamDominici);
+            tlpDati.Controls.Add(pnlChk, 0, 3);
+            tlpDati.SetColumnSpan(pnlChk, 2);
 
             // ─── DESTRA: CALENDARIO ──────────────────────────────────────────────
             var pnlRightLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 2, Margin = new Padding(5, 0, 0, 0) };
@@ -206,6 +227,7 @@ namespace Calendario.VIEW
                         (double)nudAcc.Value,
                         false
                     );
+                    p.FamigliaDominici = chkFamDominici.Checked;
                     _ctrl.AddPrenotazione(p);
                     this.DialogResult = DialogResult.OK;
                     this.Close();
