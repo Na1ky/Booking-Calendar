@@ -111,7 +111,7 @@ namespace Calendario.VIEW
             lblDateTitle.SendToBack();
 
             void AddCal(string label, MonthCalendar cal, int col) {
-                // wrapper: centra il calendario orizzontalmente e verticalmente
+                // wrapper: centra il calendario e mostra la data selezionata sotto
                 var wrapper = new Panel { Dock = DockStyle.Fill, BackColor = Color.Transparent };
                 var lblCal = new Label {
                     Text = label,
@@ -122,6 +122,15 @@ namespace Calendario.VIEW
                     Height = 20,
                     Dock = DockStyle.Top
                 };
+                // Label data selezionata — appare sotto il calendario
+                var lblSel = new Label {
+                    Text = "Data selezionata: " + cal.SelectionStart.ToString("dd/MM/yyyy"),
+                    ForeColor = Color.FromArgb(124, 58, 237),
+                    Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    AutoSize = false,
+                    Height = 18
+                };
                 cal.MaxSelectionCount = 1;
                 cal.BackColor = Color.FromArgb(18, 24, 54);
                 cal.ForeColor = TEXT;
@@ -130,16 +139,23 @@ namespace Calendario.VIEW
                 cal.TrailingForeColor = Color.FromArgb(80, 90, 140);
                 cal.ShowToday = true;
                 cal.ShowTodayCircle = true;
-                cal.Anchor = AnchorStyles.None; // centra senza Dock
+                cal.Anchor = AnchorStyles.None;
+                // Aggiorna la label quando cambia la selezione
+                cal.DateChanged += (s, ev) => {
+                    lblSel.Text = "Data selezionata: " + cal.SelectionStart.ToString("dd/MM/yyyy");
+                };
 
-                // Posiziona il calendario al centro del wrapper quando il wrapper viene ridimensionato
                 wrapper.Controls.Add(cal);
                 wrapper.Controls.Add(lblCal);
+                wrapper.Controls.Add(lblSel);
                 wrapper.Resize += (s, ev) => {
-                    int x = Math.Max(0, (wrapper.Width  - cal.Width)  / 2);
-                    int y = lblCal.Height + Math.Max(0, (wrapper.Height - lblCal.Height - cal.Height) / 2);
+                    int x = Math.Max(0, (wrapper.Width - cal.Width) / 2);
+                    int y = lblCal.Height + Math.Max(0, (wrapper.Height - lblCal.Height - lblSel.Height - cal.Height) / 2);
                     cal.Location = new Point(x, y);
-                    lblCal.Width = cal.Width; // allinea larghezza label con calendario
+                    lblCal.Width = cal.Width;
+                    lblSel.Width = cal.Width;
+                    lblSel.Left  = x;
+                    lblSel.Top   = cal.Bottom + 2;
                 };
                 calLayout.Controls.Add(wrapper, col, 0);
             }
@@ -167,26 +183,37 @@ namespace Calendario.VIEW
             // ─── EVENTI ────────────────────────────────────────────────────────────
             btnAnn.Click += (s, e) => { this.DialogResult = DialogResult.Cancel; this.Close(); };
             btnSalva.Click += (s, e) => {
-                if (string.IsNullOrWhiteSpace(txtNome.Text) || string.IsNullOrWhiteSpace(txtCognome.Text)) { MessageBox.Show("Inserire Nome e Cognome.", "Attenzione", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+                if (string.IsNullOrWhiteSpace(txtNome.Text) || string.IsNullOrWhiteSpace(txtCognome.Text)) {
+                    MessageBox.Show("Inserire Nome e Cognome.", "Attenzione", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
                 DateTime dataIn  = calInizio.SelectionStart.Date;
                 DateTime dataOut = calFine.SelectionStart.Date;
-                if (dataIn >= dataOut) { MessageBox.Show("La data di inizio deve precedere la data di fine.", "Attenzione", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
-                
-                Color colore = (cmbTipo.SelectedItem.ToString() == "SICURA") ? Color.LightGreen : Color.Yellow;
-                var p = new ClsPrenotazione(
-                    Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
-                    txtNome.Text.Trim(), txtCognome.Text.Trim(),
-                    (double)nudVers.Value,
-                    dataIn, dataOut,
-                    cmbTipo.SelectedItem.ToString() == "SICURA",
-                    colore,
-                    (double)nudSp.Value,
-                    (double)nudAcc.Value,
-                    false
-                );
-                _ctrl.AddPrenotazione(p);
-                this.DialogResult = DialogResult.OK;
-                this.Close();
+                if (dataIn >= dataOut) {
+                    MessageBox.Show("La data di Check-in deve precedere quella di Check-out.", "Attenzione", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                try {
+                    Color colore = (cmbTipo.SelectedItem.ToString() == "SICURA") ? Color.LightGreen : Color.Yellow;
+                    var p = new ClsPrenotazione(
+                        Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
+                        txtNome.Text.Trim(), txtCognome.Text.Trim(),
+                        (double)nudVers.Value,
+                        dataIn, dataOut,
+                        cmbTipo.SelectedItem.ToString() == "SICURA",
+                        colore,
+                        (double)nudSp.Value,
+                        (double)nudAcc.Value,
+                        false
+                    );
+                    _ctrl.AddPrenotazione(p);
+                    this.DialogResult = DialogResult.OK;
+                    this.Close();
+                }
+                catch (ArgumentException ex) {
+                    // Mostra il messaggio di validazione del modello in modo elegante
+                    MessageBox.Show(ex.Message, "Dati non validi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
             };
         }
     }

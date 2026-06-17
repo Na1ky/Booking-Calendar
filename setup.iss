@@ -3,7 +3,7 @@
 ; Do not use the same AppId value in installers for other applications.
 AppId={{8A7B6C5D-4E3F-2A1B-0C9D-8E7F6A5B4C3D}
 AppName=Calendario Prenotazioni
-AppVersion=1.0
+AppVersion=1.1
 AppPublisher=Gestione Booking
 DefaultDirName={autopf}\Calendario Prenotazioni
 DefaultGroupName=Calendario Prenotazioni
