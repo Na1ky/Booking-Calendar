@@ -95,9 +95,9 @@ namespace Calendario
             try
             {
                 // INSERISCI QUI I TUOI DATI GITHUB
-                string githubUser = "tuo-username"; 
+                string githubUser = "Na1ky"; 
                 string githubRepo = "Booking-Calendar"; 
-                string versioneAttuale = "v1.0"; // Versione attuale dell'app
+                string versioneAttuale = "v1.1"; // Versione attuale dell'app
 
                 string apiUrl = $"https://api.github.com/repos/{githubUser}/{githubRepo}/releases/latest";
 
