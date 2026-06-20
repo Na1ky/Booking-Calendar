@@ -29,8 +29,9 @@ namespace Calendario.VIEW
             this.Text = "Cancella Prenotazione";
             this.StartPosition = FormStartPosition.CenterParent;
 
+            this.AutoScroll = true;
             var mainLayout = new TableLayoutPanel {
-                Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 3,
+                Dock = DockStyle.Top, Height = 400, ColumnCount = 1, RowCount = 3,
                 BackColor = Color.Transparent, Padding = new Padding(30)
             };
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));  // Title

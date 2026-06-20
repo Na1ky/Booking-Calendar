@@ -42,8 +42,9 @@ namespace Calendario.VIEW
             var titleLbl = new Label { Text = "Modifica Prenotazione", Font = new Font("Segoe UI", 16F, FontStyle.Bold), ForeColor = Color.White, Dock = DockStyle.Top, Height = 40, TextAlign = ContentAlignment.MiddleLeft, Padding = new Padding(15, 0, 0, 0) };
             this.Controls.Add(titleLbl);
 
+            this.AutoScroll = true;
             var mainLayout = new TableLayoutPanel {
-                Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1,
+                Dock = DockStyle.Top, Height = 520, ColumnCount = 2, RowCount = 1,
                 BackColor = Color.Transparent, Padding = new Padding(10, 0, 10, 10)
             };
             mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
@@ -81,11 +82,12 @@ namespace Calendario.VIEW
             var lblDatiTitle = new Label { Text = "Dettagli Ospite", ForeColor = ACCENT, Font = new Font("Segoe UI", 11F, FontStyle.Bold), Dock = DockStyle.Top, Height = 30 };
             pnlLeft.Controls.Add(lblDatiTitle);
 
-            var tlpDatiLeft = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 2, Padding = new Padding(0, 5, 0, 0) };
+            var tlpDatiLeft = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 3, Padding = new Padding(0, 5, 0, 0) };
             tlpDatiLeft.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
             tlpDatiLeft.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-            tlpDatiLeft.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
-            tlpDatiLeft.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+            tlpDatiLeft.RowStyles.Add(new RowStyle(SizeType.Absolute, 65));
+            tlpDatiLeft.RowStyles.Add(new RowStyle(SizeType.Absolute, 90)); // Spazio extra per Famiglia Dominici
+            tlpDatiLeft.RowStyles.Add(new RowStyle(SizeType.Absolute, 65));
             pnlLeft.Controls.Add(tlpDatiLeft);
             lblDatiTitle.SendToBack();
 
@@ -98,15 +100,8 @@ namespace Calendario.VIEW
             var pnlRight = new ModernPanel { Dock = DockStyle.Fill, Margin = new Padding(0, 0, 0, 5), Padding = new Padding(15) };
             pnlRightLayout.Controls.Add(pnlRight, 0, 0);
 
-            var lblRightTitle = new Label { Text = "Periodo e Costi", ForeColor = Color.FromArgb(79, 172, 254), Font = new Font("Segoe UI", 11F, FontStyle.Bold), Dock = DockStyle.Top, Height = 30 };
+            var lblRightTitle = new Label { Text = "Periodo Soggiorno", ForeColor = Color.FromArgb(79, 172, 254), Font = new Font("Segoe UI", 11F, FontStyle.Bold), Dock = DockStyle.Top, Height = 30 };
             pnlRight.Controls.Add(lblRightTitle);
-
-            var tlpDatiRight = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 2, Padding = new Padding(0, 5, 0, 0) };
-            tlpDatiRight.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-            tlpDatiRight.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-            tlpDatiRight.RowStyles.Add(new RowStyle(SizeType.Absolute, 65)); // acconto/spese
-            tlpDatiRight.RowStyles.Add(new RowStyle(SizeType.Absolute, 65)); // versamento
-            pnlRight.Controls.Add(tlpDatiRight);
 
             // Calendari affiancati — centrati nel pannello
             var calLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
@@ -176,7 +171,7 @@ namespace Calendario.VIEW
                 tlp.Enabled = enabled;
             }
 
-            void AddInput(string label, Control c, TableLayoutPanel tlp, int col, int row) {
+            Panel AddInput(string label, Control c, TableLayoutPanel tlp, int col, int row) {
                 var p = new Panel { Dock = DockStyle.Fill, Margin = new Padding(5) };
                 var lbl = new Label { Text = label, ForeColor = Color.FromArgb(45, 55, 90), Dock = DockStyle.Top, Height = 20, Font = new Font("Segoe UI", 9F), TextAlign = ContentAlignment.MiddleLeft };
                 var container = new ModernInputContainer { Dock = DockStyle.Top, Height = 35, BackColor = DISABLED_BG };
@@ -189,6 +184,7 @@ namespace Calendario.VIEW
                 p.Controls.Add(container);
                 p.Controls.Add(lbl);
                 tlp.Controls.Add(p, col, row);
+                return p;
             }
 
             txtN = new TextBox(); txtC = new TextBox();
@@ -198,20 +194,36 @@ namespace Calendario.VIEW
 
             AddInput("Nome", txtN, tlpDatiLeft, 0, 0);
             AddInput("Cognome", txtC, tlpDatiLeft, 1, 0);
-            AddInput("Tipologia", cmbTip, tlpDatiLeft, 0, 1);
+            var pnlTipo = AddInput("Tipologia", cmbTip, tlpDatiLeft, 0, 1);
+            AddInput("Acconto (€)", nudAcc, tlpDatiLeft, 1, 1);
+            AddInput("Spese (€)", nudSp, tlpDatiLeft, 0, 2);
+            AddInput("Versamento (€)", nudVers, tlpDatiLeft, 1, 2);
             
-            AddInput("Acconto (€)", nudAcc, tlpDatiRight, 0, 0);
-            AddInput("Spese (€)", nudSp, tlpDatiRight, 1, 0);
-            AddInput("Versamento (€)", nudVers, tlpDatiRight, 0, 1);
-            pnlRight.Controls.Add(tlpDatiRight);
+            // ── Famiglia Dominici checkbox accodata sotto Tipologia ─────────────────
+            CheckBox chkFamDominici = new CheckBox
+            {
+                Text = "Famiglia Dominici",
+                ForeColor = Color.FromArgb(45, 55, 90), // starts disabled
+                Font = new Font("Segoe UI", 9.0F),
+                BackColor = Color.Transparent,
+                AutoSize = true,
+                Margin = new Padding(0),
+                Cursor = Cursors.Hand
+            };
+            chkFamDominici.FlatStyle = FlatStyle.Flat;
+            chkFamDominici.FlatAppearance.BorderColor = ACCENT;
+            
+            var pnlChk = new Panel { Dock = DockStyle.Bottom, Height = 26, BackColor = Color.Transparent };
+            chkFamDominici.Location = new Point(0, 4);
+            pnlChk.Controls.Add(chkFamDominici);
+            pnlTipo.Controls.Add(pnlChk);
 
             // Variabili per abilitare dopo la selezione
             tlpDati = tlpDatiLeft; // per la compatibilità col blocco sotto
-            var tlpDatiRightRef = tlpDatiRight;
             
             // Applica lo stato disabilitato con overlay visivo
             SetPanelEnabled(tlpDatiLeft, false);
-            SetPanelEnabled(tlpDatiRight, false);
+            chkFamDominici.Enabled = false;
             calInizio.Enabled = false;
             calFine.Enabled = false;
 
@@ -253,10 +265,12 @@ namespace Calendario.VIEW
                 // sync dtpInizio/dtpFine per la logica di salvataggio
                 dtpInizio.Value = sel.DataInizio;
                 dtpFine.Value   = sel.DataFine;
+                chkFamDominici.Checked = sel.FamigliaDominici;
 
                 // Rimuove lo stato disabilitato
                 SetPanelEnabled(tlpDatiLeft, true);
-                SetPanelEnabled(tlpDatiRightRef, true);
+                chkFamDominici.Enabled = true;
+                chkFamDominici.ForeColor = ACCENT;
                 calInizio.Enabled = true;
                 calFine.Enabled = true;
                 btnSalva.Enabled = true;
@@ -278,7 +292,7 @@ namespace Calendario.VIEW
                 
                 _gestionePrenotazioni.ModificaPrenotazioni(idPrenotazione, txtN.Text, txtC.Text,
                     Convert.ToDouble(nudVers.Value), cmbTip.SelectedIndex != 1,
-                    dataIn, dataOut, Convert.ToDouble(nudSp.Value), Convert.ToDouble(nudAcc.Value));
+                    dataIn, dataOut, Convert.ToDouble(nudSp.Value), Convert.ToDouble(nudAcc.Value), chkFamDominici.Checked);
                 
                 DialogResult = DialogResult.OK;
                 Close();

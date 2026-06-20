@@ -51,9 +51,11 @@ namespace Calendario.VIEW
             this.Controls.Add(titleLbl);
 
             // ─── LAYOUT PRINCIPALE (2 colonne) ─────────────────────────────────────
+            this.AutoScroll = true;
             var mainLayout = new TableLayoutPanel
             {
-                Dock = DockStyle.Fill,
+                Dock = DockStyle.Top,
+                Height = 520,
                 ColumnCount = 2,
                 RowCount = 1,
                 BackColor = Color.Transparent,

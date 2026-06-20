@@ -66,7 +66,7 @@ namespace Calendario.CONTROLLER
             MessageBox.Show(lstPrenotazioni.Find(x => x.Id == id).ToString(), "INFORMAZIONI", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        internal void ModificaPrenotazioni(string idPrenotazione, string nome, string cognome, double versamento, bool tipologia, DateTime dataInizio, DateTime dataFine, double spese, double acconto)
+        internal void ModificaPrenotazioni(string idPrenotazione, string nome, string cognome, double versamento, bool tipologia, DateTime dataInizio, DateTime dataFine, double spese, double acconto, bool famigliaDominici = false)
         {
             ClsPrenotazione prenotazioneDaModificare = lstPrenotazioni.Find(x => x.Id == idPrenotazione);
 
@@ -86,6 +86,7 @@ namespace Calendario.CONTROLLER
             prenotazioneDaModificare.DataFine = dataFine;
             prenotazioneDaModificare.SpesePulizia = spese;
             prenotazioneDaModificare.Acconto = acconto;
+            prenotazioneDaModificare.FamigliaDominici = famigliaDominici;
 
             // Prova a salvare su JSON
             try

@@ -37,8 +37,9 @@ namespace Calendario.VIEW
             var titleLbl = new Label { Text = "Nuova Prenotazione", Font = new Font("Segoe UI", 16F, FontStyle.Bold), ForeColor = Color.White, Dock = DockStyle.Top, Height = 40, TextAlign = ContentAlignment.MiddleLeft, Padding = new Padding(15, 0, 0, 0) };
             this.Controls.Add(titleLbl);
 
+            this.AutoScroll = true;
             var mainLayout = new TableLayoutPanel {
-                Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1,
+                Dock = DockStyle.Top, Height = 500, ColumnCount = 2, RowCount = 1,
                 BackColor = Color.Transparent, Padding = new Padding(10, 0, 10, 10)
             };
             mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));

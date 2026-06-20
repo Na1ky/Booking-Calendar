@@ -97,7 +97,7 @@ namespace Calendario
                 // INSERISCI QUI I TUOI DATI GITHUB
                 string githubUser = "Na1ky"; 
                 string githubRepo = "Booking-Calendar"; 
-                string versioneAttuale = "v1.1"; // Versione attuale dell'app
+                Version versioneAttuale = VersioneApplicazione;
 
                 string apiUrl = $"https://api.github.com/repos/{githubUser}/{githubRepo}/releases/latest";
 
@@ -108,13 +108,14 @@ namespace Calendario
                     string jsonResponse = await client.GetStringAsync(apiUrl);
                     JObject release = JObject.Parse(jsonResponse);
 
-                    string ultimaVersione = release["tag_name"].ToString(); 
+                    string tagUltimaVersione = release["tag_name"]?.ToString();
+                    Version ultimaVersione = EstraiVersione(tagUltimaVersione);
 
-                    if (ultimaVersione != versioneAttuale)
+                    if (ultimaVersione != null && ultimaVersione.CompareTo(versioneAttuale) > 0)
                     {
                         DialogResult ris = MessageBox.Show(
-                            $"È disponibile una nuova versione del Calendario ({ultimaVersione})!\n" +
-                            $"Attualmente stai usando la versione {versioneAttuale}.\n\n" +
+                            $"È disponibile una nuova versione del Calendario ({FormattaVersione(ultimaVersione)})!\n" +
+                            $"Attualmente stai usando la versione {FormattaVersione(versioneAttuale)}.\n\n" +
                             $"Vuoi aprire la pagina per scaricare l'aggiornamento?",
                             "Aggiornamento Disponibile",
                             MessageBoxButtons.YesNo,
@@ -135,6 +136,43 @@ namespace Calendario
             {
                 // Fallimento silenzioso se non c'è internet
             }
+        }
+
+        private static Version VersioneApplicazione
+        {
+            get
+            {
+                Version version = new Version(Application.ProductVersion);
+                return NormalizzaVersione(version);
+            }
+        }
+
+        private static Version EstraiVersione(string valore)
+        {
+            if (string.IsNullOrWhiteSpace(valore))
+                return null;
+
+            string versionePulita = valore.Trim().TrimStart('v', 'V');
+            versionePulita = versionePulita.Split('-', '+')[0];
+
+            if (Version.TryParse(versionePulita, out Version version))
+                return NormalizzaVersione(version);
+
+            return null;
+        }
+
+        private static Version NormalizzaVersione(Version version)
+        {
+            return new Version(
+                version.Major,
+                version.Minor,
+                Math.Max(version.Build, 0),
+                Math.Max(version.Revision, 0));
+        }
+
+        private static string FormattaVersione(Version version)
+        {
+            return $"v{version.Major}.{version.Minor}";
         }
 
         // ─── LAYOUT PRINCIPALE ───────────────────────────────────────────────
@@ -214,7 +252,7 @@ namespace Calendario
 
             actionForm.TopLevel         = false;
             actionForm.FormBorderStyle  = FormBorderStyle.None;
-            actionForm.Dock             = DockStyle.Top;
+            actionForm.Dock             = DockStyle.Fill;
 
             actionForm.FormClosed += (s, ev) =>
             {
