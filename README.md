@@ -14,8 +14,9 @@ Despite using the classic WinForms framework, the project features a fully custo
 *   **📅 Visual Calendar:** A clear grid interface that allows you to see occupied and free days at a glance.
 *   **📝 Reservation Management:** Quickly add, edit, and delete reservations, storing data such as Name, Surname, Deposit, Cleaning Fees, Payment, and Type (Safe/Unsafe).
 *   **💶 Price Calculator:** An integrated module to input the average prices for each month of the year and calculate the total estimated cost for a stay based on the selected dates with one click.
-*   **💾 Local Storage:** Reservation data and the monthly price list are saved and read locally as lightweight JSON files (`prenotazioni.json` and `prezzi_mensili.json`), requiring no complex external servers or databases.
-*   **🎨 Custom Modern UI:** The project integrates a custom `ModernUI.cs` class containing personalized components like `ModernButton`, `ModernPanel`, and `ModernInputContainer` for a highly refined look.
+*   **📄 Word Export:** Generate and export recap documents directly into `.docx` Word files dynamically.
+*   **🔒 Secure Cloud Sync & Auth:** Reservation data is stored in the cloud using MongoDB Atlas, and access is secured via BCrypt password hashing.
+*   **🎨 Custom Modern UI (v2.0):** The project now features an overhauled modern UI powered by `Guna.UI2.WinForms`, delivering sleek rounded corners, smooth animations, and a polished dark aesthetic.
 
 ---
 
@@ -24,7 +25,13 @@ Despite using the classic WinForms framework, the project features a fully custo
 *   **Language:** C#
 *   **Framework:** .NET / Windows Forms (WinForms)
 *   **Architecture:** Simplified Model-View-Controller (MVC) (3-tier pattern: `MODEL`, `VIEW`, `CONTROLLER`).
-*   **External Libraries:** `Newtonsoft.Json` (for data serialization and deserialization).
+*   **Database:** MongoDB Atlas (Cloud)
+*   **External Libraries:** 
+    * `Guna.UI2.WinForms` (for modern UI components)
+    * `MongoDB.Driver` (for database communication)
+    * `BCrypt.Net` (for secure password hashing)
+    * `DocumentFormat.OpenXml` (for `.docx` generation)
+    * `Newtonsoft.Json` (for legacy/local JSON configurations).
 
 ---
 
@@ -39,7 +46,8 @@ The project is logically structured into folders to separate architectural conce
     *   `FrmAggiungiPrenotazione.cs`
     *   `FrmModificaPrenotazione.cs`
     *   `FrmGestionePrezzo.cs`
-    *   `ModernUI.cs` (Graphical core with extensions for buttons, panels, and input controls)
+    *   `FrmSalvaIlFile.cs` (Word export module)
+    *   `FrmLogin.cs` & `FrmRegister.cs` (Authentication screens)
     *   ... and other forms for saving or deleting.
 
 ---

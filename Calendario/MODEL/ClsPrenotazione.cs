@@ -1,9 +1,12 @@
 using System;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using System.Drawing;
 using System.Text.RegularExpressions;
 
 namespace Calendario.MODEL
 {
+    [BsonIgnoreExtraElements]
     public class ClsPrenotazione
     {
         private string id;
@@ -24,7 +27,7 @@ namespace Calendario.MODEL
             set
             {
                 if (value < 0)
-                    throw new ArgumentException("L'acconto non può essere negativo.");
+                    throw new ArgumentException("L'acconto non puÃ² essere negativo.");
                 acconto = value;
             }
         }
@@ -34,6 +37,8 @@ namespace Calendario.MODEL
             set => spesePulizia = value;
         }
 
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
         public string Id
         {
             get => id;
@@ -45,8 +50,8 @@ namespace Calendario.MODEL
             get => nome;
             set
             {
-                if (string.IsNullOrWhiteSpace(value) || value.Length < 3 || !Regex.IsMatch(value, @"^[a-zA-Zàèéìòù ]+$"))
-                    throw new ArgumentException("Il nome deve contenere almeno 3 lettere e non avere numeri o simboli.");
+                if (string.IsNullOrWhiteSpace(value) || value.Length < 3)
+                    throw new ArgumentException("Il nome deve contenere almeno 3 caratteri.");
                 nome = value.Trim();
             }
         }
@@ -56,8 +61,8 @@ namespace Calendario.MODEL
             get => cognome;
             set
             {
-                if (string.IsNullOrWhiteSpace(value) || value.Length < 3 || !Regex.IsMatch(value, @"^[a-zA-Zàèéìòù ]+$"))
-                    throw new ArgumentException("Il cognome deve contenere almeno 3 lettere e non avere numeri o simboli.");
+                if (string.IsNullOrWhiteSpace(value) || value.Length < 3)
+                    throw new ArgumentException("Il cognome deve contenere almeno 3 caratteri.");
                 cognome = value.Trim();
             }
         }
@@ -68,7 +73,7 @@ namespace Calendario.MODEL
             set
             {
                 if (value < 0)
-                    throw new ArgumentException("Il versamento non può essere negativo.");
+                    throw new ArgumentException("Il versamento non puÃ² essere negativo.");
                 versamento = value;
             }
         }
@@ -99,15 +104,23 @@ namespace Calendario.MODEL
             set => tipoPrenotazione = value;
         }
 
+        [BsonIgnore]
         public Color ColoreCella
         {
             get => coloreCella;
             set
             {
                 if (value == Color.Transparent)
-                    throw new ArgumentException("Il colore della cella non può essere trasparente.");
+                    throw new ArgumentException("Il colore della cella non puÃ² essere trasparente.");
                 coloreCella = value;
             }
+        }
+
+        [BsonElement("Colore")]
+        public string ColoreCellaHex
+        {
+            get => ColorTranslator.ToHtml(coloreCella);
+            set => coloreCella = string.IsNullOrEmpty(value) ? Color.LightGreen : ColorTranslator.FromHtml(value);
         }
 
         public bool FamigliaDominici { get => famigliaDominici; set => famigliaDominici = value; }
@@ -115,7 +128,7 @@ namespace Calendario.MODEL
         // Metodo per ottenere i dettagli della prenotazione in stringa
         public override string ToString()
         {
-            return $"Prenotazione di {Nome} {Cognome}\ndal {DataInizio:dd/MM/yyyy} al {DataFine:dd/MM/yyyy}\nImporto: {Versamento}€\nTipo: {(TipoPrenotazione ? "Sicura" : "Insicura")}\nSpese di pulizia: {SpesePulizia}\nAcconto : {Acconto}";
+            return $"Prenotazione di {Nome} {Cognome}\ndal {DataInizio:dd/MM/yyyy} al {DataFine:dd/MM/yyyy}\nImporto: {Versamento}â‚¬\nTipo: {(TipoPrenotazione ? "Sicura" : "Insicura")}\nSpese di pulizia: {SpesePulizia}\nAcconto : {Acconto}";
         }
 
         // Costruttore

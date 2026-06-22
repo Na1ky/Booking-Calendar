@@ -10,7 +10,7 @@ namespace Calendario.VIEW
 {
     public partial class FrmTabellaRecapito : Form
     {
-        private DataGridView dgvTabella;
+        private Guna.UI2.WinForms.Guna2DataGridView dgvTabella;
         private Label lblTitolo;
         private PrenotazioneController _gestioneController;
 
@@ -43,7 +43,7 @@ namespace Calendario.VIEW
             this.Controls.Add(mainLayout);
 
             if (lblTitolo == null) lblTitolo = new Label();
-            if (dgvTabella == null) dgvTabella = new DataGridView();
+            if (dgvTabella == null) dgvTabella = new Guna.UI2.WinForms.Guna2DataGridView();
 
             lblTitolo.Text = "Riepilogo Prenotazioni";
             lblTitolo.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
@@ -52,7 +52,7 @@ namespace Calendario.VIEW
             lblTitolo.TextAlign = ContentAlignment.MiddleCenter;
             mainLayout.Controls.Add(lblTitolo, 0, 0);
 
-            var pnlGrid = new ModernPanel { Dock = DockStyle.Fill, Margin = new Padding(0, 10, 0, 0), Padding = new Padding(20) };
+            var pnlGrid = new Guna.UI2.WinForms.Guna2Panel { Dock = DockStyle.Fill, Margin = new Padding(0, 10, 0, 0), Padding = new Padding(20), FillColor = CARD_BG, BorderRadius = 12 };
             mainLayout.Controls.Add(pnlGrid, 0, 1);
 
             ConfiguraUI();

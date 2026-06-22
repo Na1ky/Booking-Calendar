@@ -3,13 +3,13 @@
 ; Do not use the same AppId value in installers for other applications.
 AppId={{8A7B6C5D-4E3F-2A1B-0C9D-8E7F6A5B4C3D}
 AppName=Calendario Prenotazioni
-AppVersion=1.2
+AppVersion=2.0
 AppPublisher=Gestione Booking
 DefaultDirName={autopf}\Calendario Prenotazioni
 DefaultGroupName=Calendario Prenotazioni
 ; Cartella di output dove verrà salvato l'installer (.exe)
 OutputDir=Installer
-OutputBaseFilename=Calendario_Setup_v1.2
+OutputBaseFilename=Calendario_Setup_v2.0
 SetupIconFile=Calendario\IMG\Icona.ico
 Compression=lzma2
 SolidCompression=yes

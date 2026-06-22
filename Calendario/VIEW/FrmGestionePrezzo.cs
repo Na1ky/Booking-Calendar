@@ -10,13 +10,13 @@ namespace Calendario.VIEW
 {
     public partial class FrmGestionePrezzo : Form
     {
-        private DataGridView dgvPrezzi;
+        private Guna.UI2.WinForms.Guna2DataGridView dgvPrezzi;
         private MonthCalendar calCheckIn;
         private MonthCalendar calCheckOut;
         private Label lblTotale;
-        private ModernButton btnCalcola;
-        private ModernButton btnSalva;
-        private ModernButton btnChiudi;
+        private Guna.UI2.WinForms.Guna2Button btnCalcola;
+        private Guna.UI2.WinForms.Guna2Button btnSalva;
+        private Guna.UI2.WinForms.Guna2Button btnChiudi;
 
         private readonly string filePrezzi = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "prezzi_mensili.json");
 
@@ -32,8 +32,8 @@ namespace Calendario.VIEW
             this.BackColor = BG;
             this.ForeColor = TEXT;
             this.Font = new Font("Segoe UI", 10F);
-            this.MinimumSize = new Size(900, 460);
-            this.Size = new Size(1060, 480);
+            this.MinimumSize = new Size(900, 520);
+            this.Size = new Size(1060, 520);
             this.Text = "Gestione Prezzi e Calcolatore";
             this.StartPosition = FormStartPosition.CenterParent;
 
@@ -51,11 +51,10 @@ namespace Calendario.VIEW
             this.Controls.Add(titleLbl);
 
             // ─── LAYOUT PRINCIPALE (2 colonne) ─────────────────────────────────────
-            this.AutoScroll = true;
+            this.AutoScroll = false;
             var mainLayout = new TableLayoutPanel
             {
-                Dock = DockStyle.Top,
-                Height = 520,
+                Dock = DockStyle.Fill,
                 ColumnCount = 2,
                 RowCount = 1,
                 BackColor = Color.Transparent,
@@ -68,11 +67,13 @@ namespace Calendario.VIEW
             titleLbl.SendToBack();
 
             // ─── SINISTRA: TABELLA PREZZI ──────────────────────────────────────────
-            var pnlLeft = new ModernPanel
+            var pnlLeft = new Guna.UI2.WinForms.Guna2Panel
             {
                 Dock = DockStyle.Fill,
                 Margin = new Padding(0, 0, 5, 0),
-                Padding = new Padding(15)
+                Padding = new Padding(15),
+                FillColor = CARD_BG,
+                BorderRadius = 12
             };
             mainLayout.Controls.Add(pnlLeft, 0, 0);
 
@@ -86,7 +87,7 @@ namespace Calendario.VIEW
             };
             pnlLeft.Controls.Add(lblPrezziTitle);
 
-            dgvPrezzi = new DataGridView
+            dgvPrezzi = new Guna.UI2.WinForms.Guna2DataGridView
             {
                 Dock = DockStyle.Fill,
                 AllowUserToAddRows = false,
@@ -110,6 +111,12 @@ namespace Calendario.VIEW
                 SelectionBackColor = ACCENT, SelectionForeColor = Color.White,
                 Font = new Font("Segoe UI", 10F), Padding = new Padding(5)
             };
+            dgvPrezzi.ThemeStyle.AlternatingRowsStyle.BackColor = CARD_BG;
+            dgvPrezzi.ThemeStyle.AlternatingRowsStyle.ForeColor = TEXT;
+            dgvPrezzi.ThemeStyle.AlternatingRowsStyle.SelectionBackColor = ACCENT;
+            dgvPrezzi.ThemeStyle.AlternatingRowsStyle.SelectionForeColor = Color.White;
+            dgvPrezzi.ThemeStyle.AlternatingRowsStyle.Font = new Font("Segoe UI", 10F);
+            
             dgvPrezzi.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
             {
                 BackColor = Color.FromArgb(14, 17, 35), ForeColor = Color.DarkGray,
@@ -144,15 +151,17 @@ namespace Calendario.VIEW
                 BackColor = Color.Transparent
             };
             rightLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            rightLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 72));
+            rightLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 65));
             mainLayout.Controls.Add(rightLayout, 1, 0);
 
             // ── CARD CALCOLATORE ──────────────────────────────────────────────────
-            var pnlCalcolo = new ModernPanel
+            var pnlCalcolo = new Guna.UI2.WinForms.Guna2Panel
             {
                 Dock = DockStyle.Fill,
                 Margin = new Padding(0, 0, 0, 5),
-                Padding = new Padding(15, 12, 15, 12)
+                Padding = new Padding(15, 12, 15, 12),
+                FillColor = CARD_BG,
+                BorderRadius = 12
             };
             rightLayout.Controls.Add(pnlCalcolo, 0, 0);
 
@@ -180,8 +189,8 @@ namespace Calendario.VIEW
             calcStack.RowStyles.Add(new RowStyle(SizeType.Absolute, 26));   // label Check-in / Check-out
             calcStack.RowStyles.Add(new RowStyle(SizeType.Percent, 100));   // MonthCalendar (si espande)
             calcStack.RowStyles.Add(new RowStyle(SizeType.Absolute, 22));   // label data selezionata
-            calcStack.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));   // bottone CALCOLA
-            calcStack.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));   // label totale
+            calcStack.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));   // bottone CALCOLA
+            calcStack.RowStyles.Add(new RowStyle(SizeType.Absolute, 35));   // label totale
             pnlCalcolo.Controls.Add(calcStack);
             lblCalcoloTitle.SendToBack();
 
@@ -283,13 +292,15 @@ namespace Calendario.VIEW
             calcStack.Controls.Add(lblSelOut, 1, 2);
 
             // Bottone CALCOLA (riga 3, span 2 colonne)
-            btnCalcola = new ModernButton
+            btnCalcola = new Guna.UI2.WinForms.Guna2Button
             {
                 Text = "CALCOLA PREZZO",
                 Dock = DockStyle.Fill,
                 Margin = new Padding(2, 6, 2, 2),
-                BackColor = Color.FromArgb(79, 172, 254),
-                ForeColor = Color.Black
+                FillColor = Color.FromArgb(79, 172, 254),
+                ForeColor = Color.Black,
+                BorderRadius = 8,
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold)
             };
             calcStack.Controls.Add(btnCalcola, 0, 3);
             calcStack.SetColumnSpan(btnCalcola, 2);
@@ -308,11 +319,13 @@ namespace Calendario.VIEW
             calcStack.SetColumnSpan(lblTotale, 2);
 
             // ── CARD PULSANTI SALVA / CHIUDI ──────────────────────────────────────
-            var pnlOps = new ModernPanel
+            var pnlOps = new Guna.UI2.WinForms.Guna2Panel
             {
                 Dock = DockStyle.Fill,
                 Margin = new Padding(0, 5, 0, 0),
-                Padding = new Padding(8)
+                Padding = new Padding(8),
+                FillColor = CARD_BG,
+                BorderRadius = 12
             };
             rightLayout.Controls.Add(pnlOps, 0, 1);
 
@@ -325,21 +338,28 @@ namespace Calendario.VIEW
             };
             opsTlp.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
             opsTlp.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            opsTlp.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             pnlOps.Controls.Add(opsTlp);
 
-            btnSalva = new ModernButton
+            btnSalva = new Guna.UI2.WinForms.Guna2Button
             {
-                Text = "SALVA",
+                Text = "SALVA PREZZI",
                 Dock = DockStyle.Fill,
                 Margin = new Padding(4),
-                BackColor = Color.FromArgb(46, 125, 50)
+                FillColor = Color.FromArgb(46, 125, 50),
+                ForeColor = Color.White,
+                BorderRadius = 8,
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold)
             };
-            btnChiudi = new ModernButton
+            btnChiudi = new Guna.UI2.WinForms.Guna2Button
             {
                 Text = "CHIUDI",
                 Dock = DockStyle.Fill,
                 Margin = new Padding(4),
-                BackColor = Color.FromArgb(40, 48, 90)
+                FillColor = Color.FromArgb(40, 48, 90),
+                ForeColor = Color.White,
+                BorderRadius = 8,
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold)
             };
             opsTlp.Controls.Add(btnSalva, 0, 0);
             opsTlp.Controls.Add(btnChiudi, 1, 0);

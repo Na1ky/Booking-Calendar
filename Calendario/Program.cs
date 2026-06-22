@@ -16,7 +16,16 @@ namespace Calendario
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FrmMain());
+            
+            var authController = new Calendario.CONTROLLER.AuthController();
+            if (authController.CheckSessioneValida())
+            {
+                Application.Run(new FrmMain());
+            }
+            else
+            {
+                Application.Run(new Calendario.VIEW.FrmLogin());
+            }
         }
     }
 }

@@ -57,7 +57,8 @@ namespace Calendario
         Label            lblNavMeseText;
         Label            lblNavAnnoText;
         bool             isUpdatingNav = false;
-        
+        bool             isWeekView = false;
+        DateTime         currentWeekViewDate = DateTime.Today;
         static readonly string[] MESI = { "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre" };
 
         public FrmMain()
@@ -83,7 +84,6 @@ namespace Calendario
         {
             this.Controls.Clear();
             BuildUI();
-            gestionePrenotazioni.CaricaDaFile(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "prenotazioni.json"));
             PopulateCalendar(currentDay.Year, currentDay.Month);
 
             // Controlla aggiornamenti in background
@@ -176,7 +176,7 @@ namespace Calendario
         }
 
         // ─── LAYOUT PRINCIPALE ───────────────────────────────────────────────
-        private Panel activeSidebarBtn = null;
+        private Control activeSidebarBtn = null;
 
         private void BuildUI()
         {
@@ -220,23 +220,23 @@ namespace Calendario
 
         private void ShowActionPanel(Control sender, Form actionForm, string successMsg = null)
         {
-            Panel clickedPanel = (sender is Label lbl) ? lbl.Parent as Panel : sender as Panel;
+            Control clickedBtn = sender;
 
             // Toggle: se clicco lo stesso bottone che era già attivo, chiudo il pannello
-            if (activeSidebarBtn == clickedPanel && clickedPanel != null)
+            if (activeSidebarBtn == clickedBtn && clickedBtn != null)
             {
                 ChiudiActionPanel();
                 return;
             }
 
-            // De-evidenzio il bottone precedente (torna sempre a C_CARD)
-            if (activeSidebarBtn != null)
-                activeSidebarBtn.BackColor = C_CARD;
+            // De-evidenzio il bottone precedente
+            if (activeSidebarBtn is Guna.UI2.WinForms.Guna2Button oldBtn)
+                oldBtn.FillColor = C_CARD;
 
             // Evidenzio il nuovo bottone attivo
-            activeSidebarBtn = clickedPanel;
-            if (activeSidebarBtn != null)
-                activeSidebarBtn.BackColor = C_ACCENT;
+            activeSidebarBtn = clickedBtn;
+            if (activeSidebarBtn is Guna.UI2.WinForms.Guna2Button newBtn)
+                newBtn.FillColor = C_ACCENT;
 
             // Pulisce il pannello da eventuali form precedenti
             foreach (Control c in pnlActionContainer.Controls.OfType<Form>().ToList())
@@ -248,6 +248,11 @@ namespace Calendario
             int h = Math.Min(actionForm.Height, 520);
             rootLayout.RowStyles[1].Height = h;
             rootLayout.PerformLayout();
+            
+            isWeekView = true;
+            currentWeekViewDate = DateTime.Today;
+            PopulateCalendar(currentDay.Year, currentDay.Month);
+            
             this.Refresh();
 
             actionForm.TopLevel         = false;
@@ -260,7 +265,6 @@ namespace Calendario
                 if (actionForm.DialogResult == DialogResult.OK)
                 {
                     PopulateCalendar(currentDay.Year, currentDay.Month);
-                    gestionePrenotazioni.SalvaSuJson(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "prenotazioni.json"));
                     AggiornaTabellSeAperta();
                     if (!string.IsNullOrEmpty(successMsg))
                         MessageBox.Show(successMsg, "Successo", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -276,12 +280,16 @@ namespace Calendario
             if (rootLayout.RowStyles[1].Height == 0) return;
             rootLayout.RowStyles[1].Height = 0;
             rootLayout.PerformLayout();
+            
+            isWeekView = false;
+            PopulateCalendar(currentDay.Year, currentDay.Month);
+            
             this.Refresh();
-            if (activeSidebarBtn != null)
-            {
+            if (activeSidebarBtn is Guna.UI2.WinForms.Guna2Button oldBtn && oldBtn.Tag?.ToString() != "accent")
+                oldBtn.FillColor = C_CARD;
+            else if (activeSidebarBtn != null)
                 activeSidebarBtn.BackColor = C_CARD;
-                activeSidebarBtn = null;
-            }
+            activeSidebarBtn = null;
             foreach (Control c in pnlActionContainer.Controls.OfType<Form>().ToList())
                 c.Dispose();
         }
@@ -323,24 +331,18 @@ namespace Calendario
                 Margin    = new Padding(0, 0, 0, 24)
             };
 
-            // Cerchio accento
-            var dot = new Panel { Size = new Size(46, 46), BackColor = C_ACCENT, Location = new Point(0, 13) };
-            RoundRegion(dot, 14);
-            brand.Controls.Add(dot);
-
-            // Icona del brand (caricata dal file)
             var picIcon = new PictureBox
             {
-                Size = new Size(24, 24),
-                Location = new Point(11, 11),
+                Size = new Size(46, 46),
+                Location = new Point(0, 13),
                 SizeMode = PictureBoxSizeMode.Zoom,
                 BackColor = Color.Transparent
             };
             string icoPathSide = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "IMG", "Icona.ico");
             if (File.Exists(icoPathSide))
-                picIcon.Image = new Icon(icoPathSide, new Size(32, 32)).ToBitmap();
+                picIcon.Image = new Icon(icoPathSide, new Size(64, 64)).ToBitmap();
             
-            dot.Controls.Add(picIcon);
+            brand.Controls.Add(picIcon);
             brand.Controls.Add(new Label
             {
                 Text      = "Calendario",
@@ -433,7 +435,7 @@ namespace Calendario
 
             // ── Bottoni ──────────────────────────────────────────────────────
             flow.Controls.Add(SectionLabel("AZIONI"));
-            flow.Controls.Add(SideBtn("➕  Aggiungi Prenotazione", btnAddPrenotation_Click, accent: true));
+            flow.Controls.Add(SideBtn("➕  Aggiungi Prenotazione", btnAddPrenotation_Click));
             flow.Controls.Add(SideBtn("✏️  Modifica Prenotazione",  btnModify_Click));
             flow.Controls.Add(SideBtn("🗑️  Cancella Prenotazione",  btnEliminaPrenotazione_Click));
 
@@ -443,6 +445,42 @@ namespace Calendario
             flow.Controls.Add(SideBtn("💰  Calcola Prezzo",          BtnPrezzo_Click));
 
             return sidebar;
+        }
+
+        private Control SideBtn(string text, EventHandler onClick, bool accent = false)
+        {
+            var btn = new Guna.UI2.WinForms.Guna2Button
+            {
+                Text = text,
+                Width = 228,
+                Height = 46,
+                BorderRadius = 11,
+                Cursor = Cursors.Hand,
+                Margin = new Padding(0, 0, 0, 7),
+                Font = new Font("Segoe UI", 9.5f, accent ? FontStyle.Bold : FontStyle.Regular),
+                TextAlign = HorizontalAlignment.Left,
+                TextOffset = new Point(15, 0),
+                Animated = true,
+                Tag = accent ? "accent" : "normal"
+            };
+
+            if (accent)
+            {
+                btn.FillColor = C_ACCENT;
+                btn.ForeColor = Color.White;
+                btn.HoverState.FillColor = C_ACCENT_HOV;
+            }
+            else
+            {
+                btn.FillColor = C_CARD;
+                btn.ForeColor = C_TEXT;
+                btn.HoverState.FillColor = C_CARD_HOV;
+                btn.CustomBorderThickness = new Padding(3, 0, 0, 0);
+                btn.CustomBorderColor = Color.FromArgb(196, 181, 253);
+            }
+
+            btn.Click += onClick;
+            return btn;
         }
 
         private Panel HDivider() => new Panel
@@ -466,54 +504,7 @@ namespace Calendario
             TextAlign = ContentAlignment.MiddleLeft
         };
 
-        private Panel SideBtn(string text, EventHandler onClick, bool accent = false)
-        {
-            // Tutti i bottoni hanno lo stesso sfondo scuro di base
-            Color bg  = C_CARD;
-            Color hov = C_CARD_HOV;
 
-            var pnl = new Panel
-            {
-                Width     = 228,
-                Height    = 46,
-                BackColor = bg,
-                Cursor    = Cursors.Hand,
-                Margin    = new Padding(0, 0, 0, 7)
-            };
-            RoundRegion(pnl, 11);
-
-            // Striscia viola a sinistra su TUTTI i bottoni
-            var stripe = new Panel
-            {
-                Width     = 3,
-                Dock      = DockStyle.Left,
-                BackColor = Color.FromArgb(196, 181, 253) // viola chiaro
-            };
-            pnl.Controls.Add(stripe);
-
-            var lbl = new Label
-            {
-                Text      = text,
-                Font      = new Font("Segoe UI", 9.5f, FontStyle.Regular),
-                ForeColor = C_TEXT,
-                BackColor = Color.Transparent,
-                Dock      = DockStyle.Fill,
-                TextAlign = ContentAlignment.MiddleLeft,
-                Padding   = new Padding(16, 0, 0, 0),
-                Cursor    = Cursors.Hand
-            };
-            pnl.Controls.Add(lbl);
-
-            Action<bool> h = on => {
-                if (pnl == activeSidebarBtn) return;
-                pnl.BackColor = on ? hov : bg;
-            };
-            pnl.MouseEnter += (s, e) => h(true);  pnl.MouseLeave += (s, e) => h(false);
-            lbl.MouseEnter += (s, e) => h(true);  lbl.MouseLeave += (s, e) => h(false);
-            pnl.Click += onClick;
-            lbl.Click += onClick;
-            return pnl;
-        }
 
         // ─── AREA CALENDARIO ─────────────────────────────────────────────────
         private Panel BuildCalendarArea()
@@ -524,6 +515,34 @@ namespace Calendario
                 BackColor = C_BG,
                 Padding   = new Padding(28, 18, 28, 18)
             };
+
+            var topBar = new Panel { Dock = DockStyle.Top, Height = 36, BackColor = Color.Transparent };
+            var pnlProfile = new FlowLayoutPanel {
+                Dock = DockStyle.Right,
+                AutoSize = true,
+                FlowDirection = FlowDirection.LeftToRight,
+                WrapContents = false,
+                BackColor = Color.Transparent,
+                Padding = new Padding(0),
+                Margin = new Padding(0)
+            };
+
+            string uName = CONTROLLER.AuthController.CurrentUser?.Username ?? "Ospite";
+            var lblIcon = new Label { Text = "👤", Font = new Font("Segoe UI", 14f), ForeColor = C_ACCENT, AutoSize = true, Margin = new Padding(0, 8, 4, 0) };
+            var lblUser = new Label { Text = uName, ForeColor = C_TEXT, Font = new Font("Segoe UI", 10.5f, FontStyle.Bold), AutoSize = true, Margin = new Padding(0, 10, 8, 0) };
+            var btnLogout = new Label { Text = "Esci", ForeColor = C_WEEKEND, Font = new Font("Segoe UI", 9.5f, FontStyle.Underline), AutoSize = true, Cursor = Cursors.Hand, Margin = new Padding(0, 11, 0, 0) };
+            btnLogout.Click += (s, e) => {
+                new CONTROLLER.AuthController().Logout();
+                this.Hide();
+                var login = new FrmLogin();
+                login.FormClosed += (s2, args) => this.Close();
+                login.Show();
+            };
+
+            pnlProfile.Controls.Add(lblIcon);
+            pnlProfile.Controls.Add(lblUser);
+            pnlProfile.Controls.Add(btnLogout);
+            topBar.Controls.Add(pnlProfile);
 
             // Header mese
             var monthHdr = new Panel { Dock = DockStyle.Top, Height = 62, BackColor = Color.Transparent };
@@ -598,32 +617,27 @@ namespace Calendario
             area.Controls.Add(calendarGrid);
             area.Controls.Add(dayBar);
             area.Controls.Add(monthHdr);
+            area.Controls.Add(topBar);
 
             return area;
         }
 
-        private Panel NavBtn(string sym)
+        private Control NavBtn(string sym)
         {
-            var pnl = new Panel { Width = 46, BackColor = C_CARD, Cursor = Cursors.Hand };
-            RoundRegion(pnl, 11);
-
-            var lbl = new Label
+            var btn = new Guna.UI2.WinForms.Guna2Button
             {
-                Text      = sym,
-                Font      = new Font("Segoe UI", 18, FontStyle.Bold),
+                Text = sym,
+                Width = 46,
+                BorderRadius = 11,
+                Cursor = Cursors.Hand,
+                FillColor = C_CARD,
                 ForeColor = C_TEXT,
-                Dock      = DockStyle.Fill,
-                TextAlign = ContentAlignment.MiddleCenter,
-                BackColor = Color.Transparent,
-                Cursor    = Cursors.Hand
+                Font = new Font("Segoe UI", 18, FontStyle.Bold),
+                Animated = true
             };
-            pnl.Controls.Add(lbl);
-
-            Action<bool> h = on => pnl.BackColor = on ? C_ACCENT : C_CARD;
-            pnl.MouseEnter += (s, e) => h(true);  pnl.MouseLeave += (s, e) => h(false);
-            lbl.MouseEnter += (s, e) => h(true);  lbl.MouseLeave += (s, e) => h(false);
-            lbl.Click      += (s, e) => InvokeOnClick(pnl, e);
-            return pnl;
+            btn.HoverState.FillColor = C_ACCENT;
+            btn.HoverState.ForeColor = Color.White;
+            return btn;
         }
 
         // ─── POPULATE ────────────────────────────────────────────────────────
@@ -632,46 +646,72 @@ namespace Calendario
             foreach (Control c in calendarGrid.Controls.Cast<Control>().ToList())
             { calendarGrid.Controls.Remove(c); c.Dispose(); }
 
-            var firstDay = new DateTime(year, month, 1);
-            lblMeseCorrente.Text = firstDay
-                .ToString("MMMM yyyy", new CultureInfo("it-IT")).ToUpper();
-
             // Sincronizza i menu a tendina laterali
             isUpdatingNav = true;
             if (lblNavMeseText != null) lblNavMeseText.Text = MESI[month - 1];
             if (lblNavAnnoText != null) lblNavAnnoText.Text = year.ToString();
             isUpdatingNav = false;
 
-            int daysInMonth = DateTime.DaysInMonth(year, month);
-            int startCol    = (int)firstDay.DayOfWeek;
-            startCol = startCol == 0 ? 6 : startCol - 1;
+            var datesToRender = new List<DateTime?>();
+            if (isWeekView) {
+                int diff = (7 + (currentWeekViewDate.DayOfWeek - DayOfWeek.Monday)) % 7;
+                DateTime weekStart = currentWeekViewDate.AddDays(-1 * diff).Date;
+                lblMeseCorrente.Text = $"{weekStart.ToString("dd MMM")} - {weekStart.AddDays(6).ToString("dd MMM yyyy")}".ToUpper();
+                for (int i = 0; i < 7; i++) datesToRender.Add(weekStart.AddDays(i));
+            } else {
+                var firstDay = new DateTime(year, month, 1);
+                lblMeseCorrente.Text = firstDay.ToString("MMMM yyyy", new CultureInfo("it-IT")).ToUpper();
+                int daysInMonth = DateTime.DaysInMonth(year, month);
+                int startCol = (int)firstDay.DayOfWeek;
+                startCol = startCol == 0 ? 6 : startCol - 1;
+                
+                int cDay = 1;
+                for (int i = 0; i < 42; i++) {
+                    if (i < startCol || cDay > daysInMonth) {
+                        datesToRender.Add(null);
+                    } else {
+                        datesToRender.Add(new DateTime(year, month, cDay++));
+                    }
+                }
+            }
 
-            var pren  = gestionePrenotazioni.GetPrenotazioniPerMese(year, month);
+            int rows = isWeekView ? 1 : 6;
+            calendarGrid.RowStyles.Clear();
+            calendarGrid.RowCount = rows;
+            float rowHeight = isWeekView ? 100f : 16.66f;
+            for (int i = 0; i < rows; i++)
+                calendarGrid.RowStyles.Add(new RowStyle(SizeType.Percent, rowHeight));
+
+            var pren = gestionePrenotazioni.getPrenotazione;
             var today = DateTime.Today;
-            int day   = 1;
 
-            for (int row = 0; row < 6; row++)
+            int index = 0;
+            for (int row = 0; row < rows; row++)
             {
                 for (int col = 0; col < 7; col++)
                 {
-                    bool isEmpty   = (row == 0 && col < startCol) || day > daysInMonth;
+                    DateTime? dateOrNull = datesToRender[index++];
+                    bool isEmpty = !dateOrNull.HasValue;
                     bool isWeekend = col >= 5;
 
-                    var cell = new Panel
+                    var cell = new Guna.UI2.WinForms.Guna2Panel
                     {
-                        Dock      = DockStyle.Fill,
-                        BackColor = isEmpty ? C_EMPTY : C_CARD,
-                        Margin    = new Padding(3)
+                        Dock = DockStyle.Fill,
+                        FillColor = isEmpty ? C_EMPTY : C_CARD,
+                        Margin = new Padding(3),
+                        BorderRadius = 9,
+                        Cursor = Cursors.Hand
                     };
-                    RoundRegion(cell, 9);
 
                     if (!isEmpty)
                     {
-                        bool isToday = year == today.Year && month == today.Month && day == today.Day;
+                        DateTime currentDate = dateOrNull.Value;
+                        bool isToday = currentDate.Date == today.Date;
+                        int day = currentDate.Day;
 
-                        ClsPrenotazione booking = pren.FirstOrDefault(p =>
-                            p.DataInizio.Date <= new DateTime(year, month, day) &&
-                            p.DataFine.Date   >= new DateTime(year, month, day));
+                        var bookings = pren.Where(p =>
+                            p.DataInizio.Date <= currentDate &&
+                            p.DataFine.Date   >= currentDate).OrderBy(p => p.DataInizio).ToList();
 
                         // ── Numero giorno ─────────────────────────────────────
                         var lblNum = new Label
@@ -693,78 +733,117 @@ namespace Calendario
                         cell.Controls.Add(lblNum);
 
                         // ── Badge prenotazione ────────────────────────────────
-                        if (booking != null)
+                        if (bookings.Count > 0)
                         {
-                            cell.Tag = booking.Id;
+                            cell.Tag = string.Join(",", bookings.Select(b => b.Id));
 
-                            // Evidenzia tutta la cella con una versione morbida ma visibile del colore
-                            cell.BackColor = Color.FromArgb(70, booking.ColoreCella.R, booking.ColoreCella.G, booking.ColoreCella.B);
-
-                            // Barra laterale per dare forza al colore
-                            var sideBar = new Panel
+                            if (bookings.Count == 1)
                             {
-                                Width     = 6,
-                                Dock      = DockStyle.Left,
-                                BackColor = booking.ColoreCella,
-                                Cursor    = Cursors.Hand
-                            };
-                            cell.Controls.Add(sideBar);
+                                var booking = bookings[0];
+                                cell.FillColor = Color.FromArgb(70, booking.ColoreCella.R, booking.ColoreCella.G, booking.ColoreCella.B);
+                                var sideBar = new Panel { Width = 6, Dock = DockStyle.Left, BackColor = booking.ColoreCella, Cursor = Cursors.Hand };
+                                cell.Controls.Add(sideBar);
 
-                            // Testo "PRENOTATO"
-                            var lblPrenotato = new Label
+                                var lblPrenotato = new Label { Text = "PRENOTATO", Font = new Font("Segoe UI", 8.5f, FontStyle.Bold), ForeColor = booking.ColoreCella, Location = new Point(14, 38), AutoSize = true, BackColor = Color.Transparent, Cursor = Cursors.Hand };
+                                cell.Controls.Add(lblPrenotato);
+
+                                string displayName = (booking.Nome + " " + booking.Cognome).Trim();
+                                if (string.IsNullOrEmpty(displayName)) displayName = "Sconosciuto";
+                                var lblNome = new Label { Text = displayName.ToUpper(), Font = new Font("Segoe UI", 9.5f, FontStyle.Regular), ForeColor = C_TEXT, Location = new Point(14, 56), AutoSize = false, Size = new Size(150, 40), Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right, BackColor = Color.Transparent, Cursor = Cursors.Hand };
+                                cell.Controls.Add(lblNome);
+
+                                Color baseColor = cell.FillColor;
+                                Color hoverColor = Color.FromArgb(100, booking.ColoreCella.R, booking.ColoreCella.G, booking.ColoreCella.B);
+                                Action<bool> hovBooking = on => cell.FillColor = on ? hoverColor : baseColor;
+                                cell.MouseEnter += (s, ev) => hovBooking(true); cell.MouseLeave += (s, ev) => hovBooking(false);
+                                sideBar.MouseEnter += (s, ev) => hovBooking(true); sideBar.MouseLeave += (s, ev) => hovBooking(false);
+                                lblPrenotato.MouseEnter += (s, ev) => hovBooking(true); lblPrenotato.MouseLeave += (s, ev) => hovBooking(false);
+                                lblNome.MouseEnter += (s, ev) => hovBooking(true); lblNome.MouseLeave += (s, ev) => hovBooking(false);
+
+                                sideBar.Click += (s, ev) => CellClick(cell);
+                                lblPrenotato.Click += (s, ev) => CellClick(cell);
+                                lblNome.Click += (s, ev) => CellClick(cell);
+                                
+                                if (isWeekView) {
+                                    var lblDetails = new Label {
+                                        Text = $"Inizio: {booking.DataInizio:dd/MM/yyyy HH:mm}\nFine: {booking.DataFine:dd/MM/yyyy HH:mm}\nAcconto: {booking.Acconto}€\nVersamento: {booking.Versamento}€\nSpese: {booking.SpesePulizia}€",
+                                        Font = new Font("Segoe UI", 9f),
+                                        ForeColor = Color.FromArgb(160, 170, 210),
+                                        Location = new Point(14, 100),
+                                        AutoSize = true,
+                                        BackColor = Color.Transparent,
+                                        Cursor = Cursors.Hand
+                                    };
+                                    cell.Controls.Add(lblDetails);
+                                    lblDetails.MouseEnter += (s, ev) => hovBooking(true); 
+                                    lblDetails.MouseLeave += (s, ev) => hovBooking(false);
+                                    lblDetails.Click += (s, ev) => CellClick(cell);
+                                }
+                            }
+                            else
                             {
-                                Text      = "PRENOTATO",
-                                Font      = new Font("Segoe UI", 8.5f, FontStyle.Bold),
-                                ForeColor = booking.ColoreCella, // Usa il colore pieno per il testo
-                                Location  = new Point(14, 38),
-                                AutoSize  = true,
-                                BackColor = Color.Transparent,
-                                Cursor    = Cursors.Hand
-                            };
-                            cell.Controls.Add(lblPrenotato);
+                                // Turnover: Due prenotazioni
+                                var b1 = bookings[0]; // Quella che finisce oggi
+                                var b2 = bookings[1]; // Quella che inizia oggi
+                                
+                                cell.FillColor = Color.FromArgb(50, 100, 100, 100); // Sfondo grigio neutro per il turnover
 
-                            // Testo Nome Cliente
-                            string displayName = (booking.Nome + " " + booking.Cognome).Trim();
-                            if (string.IsNullOrEmpty(displayName)) displayName = "Sconosciuto";
+                                var sideBar1 = new Panel { Width = 6, Dock = DockStyle.Left, BackColor = b1.ColoreCella, Cursor = Cursors.Hand };
+                                var sideBar2 = new Panel { Width = 6, Dock = DockStyle.Right, BackColor = b2.ColoreCella, Cursor = Cursors.Hand };
+                                cell.Controls.Add(sideBar1);
+                                cell.Controls.Add(sideBar2);
 
-                            var lblNome = new Label
-                            {
-                                Text      = displayName.ToUpper(),
-                                Font      = new Font("Segoe UI", 9.5f, FontStyle.Regular),
-                                ForeColor = C_TEXT,
-                                Location  = new Point(14, 56),
-                                AutoSize  = false,
-                                Size      = new Size(150, 40), // Abbastanza largo ma senza sforare
-                                Anchor    = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
-                                BackColor = Color.Transparent,
-                                Cursor    = Cursors.Hand
-                            };
-                            cell.Controls.Add(lblNome);
+                                string n1 = (b1.Nome + " " + b1.Cognome).Trim();
+                                string n2 = (b2.Nome + " " + b2.Cognome).Trim();
 
-                            // Gestione Hover per l'intera cella colorata
-                            Color baseColor = cell.BackColor;
-                            Color hoverColor = Color.FromArgb(100, booking.ColoreCella.R, booking.ColoreCella.G, booking.ColoreCella.B);
-                            
-                            Action<bool> hovBooking = on => cell.BackColor = on ? hoverColor : baseColor;
-                            
-                            cell.MouseEnter         += (s, ev) => hovBooking(true);
-                            cell.MouseLeave         += (s, ev) => hovBooking(false);
-                            sideBar.MouseEnter      += (s, ev) => hovBooking(true);
-                            sideBar.MouseLeave      += (s, ev) => hovBooking(false);
-                            lblPrenotato.MouseEnter += (s, ev) => hovBooking(true);
-                            lblPrenotato.MouseLeave += (s, ev) => hovBooking(false);
-                            lblNome.MouseEnter      += (s, ev) => hovBooking(true);
-                            lblNome.MouseLeave      += (s, ev) => hovBooking(false);
+                                var lblOut = new Label { Text = "OUT: " + n1, Font = new Font("Segoe UI", 7.5f, FontStyle.Bold), ForeColor = b1.ColoreCella, Location = new Point(14, 38), AutoSize = false, Width = 110, Height = 15, BackColor = Color.Transparent, Cursor = Cursors.Hand };
+                                var lblIn = new Label { Text = "IN: " + n2, Font = new Font("Segoe UI", 7.5f, FontStyle.Bold), ForeColor = b2.ColoreCella, Location = new Point(14, 56), AutoSize = false, Width = 110, Height = 15, BackColor = Color.Transparent, Cursor = Cursors.Hand };
+                                cell.Controls.Add(lblOut);
+                                cell.Controls.Add(lblIn);
 
-                            sideBar.Click      += (s, ev) => CellClick(cell);
-                            lblPrenotato.Click += (s, ev) => CellClick(cell);
-                            lblNome.Click      += (s, ev) => CellClick(cell);
+                                Color baseColor = cell.FillColor;
+                                Color hoverColor = Color.FromArgb(70, 120, 120, 120);
+                                Action<bool> hovBooking = on => cell.FillColor = on ? hoverColor : baseColor;
+                                cell.MouseEnter += (s, ev) => hovBooking(true); cell.MouseLeave += (s, ev) => hovBooking(false);
+                                sideBar1.MouseEnter += (s, ev) => hovBooking(true); sideBar1.MouseLeave += (s, ev) => hovBooking(false);
+                                sideBar2.MouseEnter += (s, ev) => hovBooking(true); sideBar2.MouseLeave += (s, ev) => hovBooking(false);
+                                lblOut.MouseEnter += (s, ev) => hovBooking(true); lblOut.MouseLeave += (s, ev) => hovBooking(false);
+                                lblIn.MouseEnter += (s, ev) => hovBooking(true); lblIn.MouseLeave += (s, ev) => hovBooking(false);
+
+                                sideBar1.Click += (s, ev) => CellClick(cell);
+                                sideBar2.Click += (s, ev) => CellClick(cell);
+                                lblOut.Click += (s, ev) => CellClick(cell);
+                                lblIn.Click += (s, ev) => CellClick(cell);
+                                
+                                if (isWeekView) {
+                                    lblOut.Location = new Point(14, 38);
+                                    lblIn.Location = new Point(14, 115);
+                                    
+                                    var lblDetOut = new Label {
+                                        Text = $"Fine: {b1.DataFine:dd/MM/yyyy HH:mm}\nAcconto: {b1.Acconto}€ | Vers: {b1.Versamento}€",
+                                        Font = new Font("Segoe UI", 8.5f), ForeColor = Color.FromArgb(160, 170, 210),
+                                        Location = new Point(14, 55), AutoSize = true, BackColor = Color.Transparent, Cursor = Cursors.Hand
+                                    };
+                                    var lblDetIn = new Label {
+                                        Text = $"Inizio: {b2.DataInizio:dd/MM/yyyy HH:mm}\nAcconto: {b2.Acconto}€ | Vers: {b2.Versamento}€",
+                                        Font = new Font("Segoe UI", 8.5f), ForeColor = Color.FromArgb(160, 170, 210),
+                                        Location = new Point(14, 132), AutoSize = true, BackColor = Color.Transparent, Cursor = Cursors.Hand
+                                    };
+                                    cell.Controls.Add(lblDetOut);
+                                    cell.Controls.Add(lblDetIn);
+                                    
+                                    lblDetOut.MouseEnter += (s, ev) => hovBooking(true); lblDetOut.MouseLeave += (s, ev) => hovBooking(false);
+                                    lblDetIn.MouseEnter += (s, ev) => hovBooking(true); lblDetIn.MouseLeave += (s, ev) => hovBooking(false);
+                                    lblDetOut.Click += (s, ev) => CellClick(cell);
+                                    lblDetIn.Click += (s, ev) => CellClick(cell);
+                                }
+                            }
                         }
                         else
                         {
                             // ── Hover standard per celle vuote ─────────────────────
                             Color normalBg = C_CARD;
-                            Action<bool> hov = on => cell.BackColor = on ? C_CARD_HOV : normalBg;
+                            Action<bool> hov = on => cell.FillColor = on ? C_CARD_HOV : normalBg;
                             cell.MouseEnter  += (s, ev) => hov(true);
                             cell.MouseLeave  += (s, ev) => hov(false);
                             lblNum.MouseEnter += (s, ev) => hov(true);
@@ -773,8 +852,6 @@ namespace Calendario
 
                         cell.Click       += (s, ev) => CellClick(cell);
                         lblNum.Click     += (s, ev) => CellClick(cell);
-
-                        day++;
                     }
 
                     calendarGrid.Controls.Add(cell, col, row);
@@ -792,9 +869,23 @@ namespace Calendario
 
         // ─── NAVIGAZIONE ─────────────────────────────────────────────────────
         private void BtnNext_Click(object s, EventArgs e)
-        { currentDay = currentDay.AddMonths(1);  PopulateCalendar(currentDay.Year, currentDay.Month); }
+        { 
+            if (isWeekView) {
+                currentWeekViewDate = currentWeekViewDate.AddDays(7);
+            } else {
+                currentDay = currentDay.AddMonths(1);
+            }
+            PopulateCalendar(currentDay.Year, currentDay.Month); 
+        }
         private void BtnPrev_Click(object s, EventArgs e)
-        { currentDay = currentDay.AddMonths(-1); PopulateCalendar(currentDay.Year, currentDay.Month); }
+        { 
+            if (isWeekView) {
+                currentWeekViewDate = currentWeekViewDate.AddDays(-7);
+            } else {
+                currentDay = currentDay.AddMonths(-1);
+            }
+            PopulateCalendar(currentDay.Year, currentDay.Month); 
+        }
 
         public void vaiA(DateTime d)
         { currentDay = d; PopulateCalendar(d.Year, d.Month); Activate(); BringToFront(); }

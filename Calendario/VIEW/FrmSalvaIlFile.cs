@@ -24,9 +24,9 @@ namespace Calendario.VIEW
         static readonly Color ACCENT = Color.FromArgb(124, 58, 237);
         static readonly Color INPUT_BG = Color.FromArgb(30, 38, 80);
 
-        private ComboBox cmbAnni;
-        private TextBox txtPath;
-        private ModernButton btnOpenSrc, btnSalva, btnApriFile, btnCancel;
+        private Guna.UI2.WinForms.Guna2ComboBox cmbAnni;
+        private Guna.UI2.WinForms.Guna2TextBox txtPath;
+        private Guna.UI2.WinForms.Guna2Button btnOpenSrc, btnSalva, btnApriFile, btnCancel;
 
         public FrmSalvaIlFile(PrenotazioneController gestionePrenotazioni)
         {
@@ -53,40 +53,42 @@ namespace Calendario.VIEW
             mainLayout.Controls.Add(titleLbl, 0, 0);
 
             // ─── CARD CENTRALE ───────────────────────────────────────────────────
-            var card = new ModernPanel { Dock = DockStyle.Fill, Margin = new Padding(0, 10, 0, 10), Padding = new Padding(20) };
+            var card = new Guna.UI2.WinForms.Guna2Panel { Dock = DockStyle.Fill, Margin = new Padding(0, 10, 0, 10), Padding = new Padding(20), FillColor = CARD_BG, BorderRadius = 12 };
             mainLayout.Controls.Add(card, 0, 1);
 
             var cardLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 4 };
             cardLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 60)); // Year
             cardLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 65)); // Path
             cardLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); // Spacer
-            cardLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 50)); // Buttons
+            cardLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 70)); // Buttons
             card.Controls.Add(cardLayout);
 
             // Year Selection
             var pnlYear = new Panel { Dock = DockStyle.Fill, Margin = new Padding(0) };
             cardLayout.Controls.Add(pnlYear, 0, 0);
-            pnlYear.Controls.Add(new Label { Text = "Seleziona Anno:", ForeColor = Color.LightGray, Dock = DockStyle.Top, Height = 25 });
-            cmbAnni = new ComboBox { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDownList, BackColor = INPUT_BG, ForeColor = TEXT, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 11F) };
-            var yearContainer = new ModernInputContainer { Dock = DockStyle.Top, Height = 35 };
-            yearContainer.Controls.Add(cmbAnni);
-            pnlYear.Controls.Add(yearContainer);
+            cmbAnni = new Guna.UI2.WinForms.Guna2ComboBox { Dock = DockStyle.Top, Height = 36, FillColor = INPUT_BG, ForeColor = TEXT, BorderRadius = 6, BorderColor = Color.FromArgb(30, 36, 70), Font = new Font("Segoe UI", 11F) };
+            var lblYear = new Label { Text = "Seleziona Anno:", ForeColor = Color.LightGray, Dock = DockStyle.Top, Height = 25 };
+            pnlYear.Controls.Add(cmbAnni);
+            pnlYear.Controls.Add(lblYear);
+            cmbAnni.BringToFront(); // Dock below the label
 
             // Path Selection
             var pnlPath = new Panel { Dock = DockStyle.Fill, Margin = new Padding(0) };
             cardLayout.Controls.Add(pnlPath, 0, 1);
-            pnlPath.Controls.Add(new Label { Text = "Percorso di Salvataggio:", ForeColor = Color.LightGray, Dock = DockStyle.Top, Height = 25 });
             
-            var pathTlp = new TableLayoutPanel { Dock = DockStyle.Top, Height = 40, ColumnCount = 2, Margin = new Padding(0) };
+            var pathTlp = new TableLayoutPanel { Dock = DockStyle.Top, Height = 40, ColumnCount = 2, RowCount = 1, Margin = new Padding(0) };
             pathTlp.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
             pathTlp.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
+            pathTlp.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            
+            var lblPath = new Label { Text = "Percorso di Salvataggio:", ForeColor = Color.LightGray, Dock = DockStyle.Top, Height = 25 };
             pnlPath.Controls.Add(pathTlp);
+            pnlPath.Controls.Add(lblPath);
+            pathTlp.BringToFront(); // Dock below the label
 
-            txtPath = new TextBox { Dock = DockStyle.Fill, ReadOnly = true, BackColor = INPUT_BG, ForeColor = TEXT, BorderStyle = BorderStyle.None, Font = new Font("Segoe UI", 11F) };
-            var pathContainer = new ModernInputContainer { Dock = DockStyle.Fill, Height = 35 };
-            pathContainer.Controls.Add(txtPath);
-            btnOpenSrc = new ModernButton { Text = "SFOGLIA", Dock = DockStyle.Fill, Margin = new Padding(10, 0, 0, 0), BackColor = Color.FromArgb(79, 172, 254), ForeColor = Color.Black, Font = new Font("Segoe UI", 10F, FontStyle.Bold) };
-            pathTlp.Controls.Add(pathContainer, 0, 0);
+            txtPath = new Guna.UI2.WinForms.Guna2TextBox { Dock = DockStyle.Fill, ReadOnly = true, FillColor = INPUT_BG, ForeColor = TEXT, BorderRadius = 6, BorderColor = Color.FromArgb(30, 36, 70), Font = new Font("Segoe UI", 10F) };
+            btnOpenSrc = new Guna.UI2.WinForms.Guna2Button { Text = "SFOGLIA", Dock = DockStyle.Fill, Margin = new Padding(8, 0, 0, 0), FillColor = Color.FromArgb(79, 172, 254), ForeColor = Color.Black, BorderRadius = 8, Font = new Font("Segoe UI", 10F, FontStyle.Bold) };
+            pathTlp.Controls.Add(txtPath, 0, 0);
             pathTlp.Controls.Add(btnOpenSrc, 1, 0);
 
             // Buttons
@@ -94,11 +96,12 @@ namespace Calendario.VIEW
             pnlButtons.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33f));
             pnlButtons.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33f));
             pnlButtons.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33f));
+            pnlButtons.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             cardLayout.Controls.Add(pnlButtons, 0, 3);
 
-            btnCancel = new ModernButton { Text = "CHIUDI", Dock = DockStyle.Fill, Margin = new Padding(4, 0, 4, 0), BackColor = Color.FromArgb(40, 48, 90) };
-            btnApriFile = new ModernButton { Text = "APRI FILE", Dock = DockStyle.Fill, Margin = new Padding(4, 0, 4, 0), BackColor = Color.FromArgb(20, 150, 100), Enabled = false };
-            btnSalva = new ModernButton { Text = "CREA WORD", Dock = DockStyle.Fill, Margin = new Padding(4, 0, 4, 0), BackColor = ACCENT, Enabled = false };
+            btnCancel   = new Guna.UI2.WinForms.Guna2Button { Text = "CHIUDI",      Dock = DockStyle.Fill, Margin = new Padding(4, 6, 4, 6), FillColor = Color.FromArgb(40, 48, 90),      ForeColor = Color.White, BorderRadius = 8, Font = new Font("Segoe UI", 10F, FontStyle.Bold) };
+            btnApriFile = new Guna.UI2.WinForms.Guna2Button { Text = "APRI FILE",   Dock = DockStyle.Fill, Margin = new Padding(4, 6, 4, 6), FillColor = Color.FromArgb(20, 150, 100),    ForeColor = Color.White, BorderRadius = 8, Font = new Font("Segoe UI", 10F, FontStyle.Bold), Enabled = false };
+            btnSalva    = new Guna.UI2.WinForms.Guna2Button { Text = "CREA WORD",   Dock = DockStyle.Fill, Margin = new Padding(4, 6, 4, 6), FillColor = ACCENT,                          ForeColor = Color.White, BorderRadius = 8, Font = new Font("Segoe UI", 10F, FontStyle.Bold), Enabled = false };
 
             pnlButtons.Controls.Add(btnCancel, 0, 0);
             pnlButtons.Controls.Add(btnApriFile, 1, 0);

@@ -36,7 +36,7 @@ namespace Calendario.VIEW
             };
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));  // Title
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); // Card
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 60));  // Buttons
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 70));  // Buttons
             this.Controls.Add(mainLayout);
 
             // ─── TITOLO ──────────────────────────────────────────────────────────
@@ -49,13 +49,13 @@ namespace Calendario.VIEW
             var lblSel = new Label { Text = "Seleziona la prenotazione da eliminare:", Font = new Font("Segoe UI", 11F), ForeColor = Color.LightGray, Dock = DockStyle.Top, Height = 30 };
             card.Controls.Add(lblSel);
 
-            var cmb = new ComboBox {
+            var cmb = new Guna.UI2.WinForms.Guna2ComboBox {
                 Dock = DockStyle.Fill,
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                BackColor = INPUT_BG, ForeColor = TEXT, FlatStyle = FlatStyle.Flat,
+                BackColor = Color.Transparent, FillColor = INPUT_BG, ForeColor = TEXT,
+                BorderRadius = 6, BorderColor = Color.FromArgb(30, 36, 70),
                 Font = new Font("Segoe UI", 11F)
             };
-            var selContainer = new ModernInputContainer { Dock = DockStyle.Top, Height = 40 };
+            var selContainer = new Panel { Dock = DockStyle.Top, Height = 40 };
             selContainer.Controls.Add(cmb);
             card.Controls.Add(selContainer);
             lblSel.SendToBack();
@@ -77,11 +77,12 @@ namespace Calendario.VIEW
             opsTlp.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
             opsTlp.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33));
             opsTlp.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 34));
+            opsTlp.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             pnlOps.Controls.Add(opsTlp);
 
-            var btnDelAll = new ModernButton { Text = "ELIMINA TUTTE", Dock = DockStyle.Fill, Margin = new Padding(4), BackColor = Color.Maroon };
-            var btnDel = new ModernButton { Text = "ELIMINA", Dock = DockStyle.Fill, Margin = new Padding(4), BackColor = Color.FromArgb(220, 38, 38) };
-            var btnAnn = new ModernButton { Text = "ANNULLA", Dock = DockStyle.Fill, Margin = new Padding(4), BackColor = Color.FromArgb(40, 48, 90) };
+            var btnDelAll = new Guna.UI2.WinForms.Guna2Button { Text = "ELIMINA TUTTE", Dock = DockStyle.Fill, Margin = new Padding(4), FillColor = Color.Maroon, BorderRadius = 6, Font = new Font("Segoe UI", 10F, FontStyle.Bold) };
+            var btnDel = new Guna.UI2.WinForms.Guna2Button { Text = "ELIMINA", Dock = DockStyle.Fill, Margin = new Padding(4), FillColor = Color.FromArgb(220, 38, 38), BorderRadius = 6, Font = new Font("Segoe UI", 10F, FontStyle.Bold) };
+            var btnAnn = new Guna.UI2.WinForms.Guna2Button { Text = "ANNULLA", Dock = DockStyle.Fill, Margin = new Padding(4), FillColor = Color.FromArgb(40, 48, 90), BorderRadius = 6, Font = new Font("Segoe UI", 10F, FontStyle.Bold) };
 
             opsTlp.Controls.Add(btnDelAll, 0, 0);
             opsTlp.Controls.Add(btnDel, 1, 0);
