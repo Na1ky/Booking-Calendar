@@ -43,3 +43,6 @@ Thumbs.db
 # Dependencies
 packages/
 nuget.exe
+
+# Environment variables
+.env
