@@ -18,7 +18,7 @@ Despite using the classic WinForms framework, the project features a fully custo
 *   **💶 Price Calculator:** An integrated module to input the average prices for each month of the year and calculate the total estimated cost for a stay based on the selected dates with one click.
 *   **📄 Word Export:** Generate and export recap documents directly into `.docx` Word files dynamically.
 *   **🔒 Secure Cloud Sync & Auth:** Reservation data is stored in the cloud using MongoDB Atlas, and access is secured via BCrypt password hashing.
-*   **🎨 Custom Modern UI (v2.0):** The project now features an overhauled modern UI powered by `Guna.UI2.WinForms`, delivering sleek rounded corners, smooth animations, and a polished dark aesthetic.
+*   **🎨 Custom Modern UI (v2.1):** The project now features an overhauled modern UI powered by `Guna.UI2.WinForms`, delivering sleek rounded corners, smooth animations, and a polished dark aesthetic. Word export now generates fully styled professional documents with a modern layout.
 
 ---
 
@@ -82,3 +82,4 @@ The interface is based on a **Dark-Indigo/Purple** palette:
 ## 📝 License
 
 This project is distributed "as is" for educational or personal management purposes.
+

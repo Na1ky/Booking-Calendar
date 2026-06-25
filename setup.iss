@@ -3,13 +3,13 @@
 ; Do not use the same AppId value in installers for other applications.
 AppId={{8A7B6C5D-4E3F-2A1B-0C9D-8E7F6A5B4C3D}
 AppName=Calendario Prenotazioni
-AppVersion=2.0
+AppVersion=2.1
 AppPublisher=Gestione Booking
 DefaultDirName={autopf}\Calendario Prenotazioni
 DefaultGroupName=Calendario Prenotazioni
 ; Cartella di output dove verrà salvato l'installer (.exe)
 OutputDir=Installer
-OutputBaseFilename=Calendario_Setup_v2.0
+OutputBaseFilename=Calendario_Setup_v2.1
 SetupIconFile=Calendario\IMG\Icona.ico
 Compression=lzma2
 SolidCompression=yes
@@ -36,3 +36,4 @@ Name: "{autodesktop}\Calendario Prenotazioni"; Filename: "{app}\Calendario.exe";
 
 [Run]
 Filename: "{app}\Calendario.exe"; Description: "{cm:LaunchProgram,Calendario Prenotazioni}"; Flags: nowait postinstall skipifsilent
+
